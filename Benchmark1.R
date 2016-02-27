@@ -43,8 +43,20 @@ train = train[, -2]
 train.numeric = train[, sapply(train, is.numeric)]
 test.numeric = test[, sapply(test, is.numeric)]
 
+# Example of removing highly correlated variables
+correl <- cor(train.numeric,use="pairwise.complete.obs")
+correlated <- findCorrelation(correl,cutoff=0.9)
+train.numeric <- train.numeric[,-correlated]
+test.numeric <- test.numeric[,-correlated]
+
+# Example of reducing dimensions
+xTrans <- preProcess(train.numeric,method="pca",thres=0.90,verbose=TRUE)
+train.numeric <- predict(xTrans, train.numeric)
+test.numeric <- predict(xTrans, test.numeric)
+
 ###--- Model Training ---###
 
 # Run NaiveBayes model 
+# To use categorical variables: must find which factor levels are not in the training set
 m = naiveBayes(train.numeric, labels, laplace = 0)
 p = predict(m, test.numeric, type = "raw")
